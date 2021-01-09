@@ -5,6 +5,7 @@ namespace App\Controller;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Longman\TelegramBot\Telegram;
 use Longman\TelegramBot\Exception\TelegramException;
@@ -31,6 +32,9 @@ class TelegramBotController extends AbstractController
     public function index()
     {
         try {
+            $input = file_get_contents('php://input');
+            $this->logger->debug($input);
+
             $telegramToken = $this->getParameter('app.telegram_api_token');
             $telegramName = $this->getParameter('app.telegram_api_name');
             // Create Telegram API object
