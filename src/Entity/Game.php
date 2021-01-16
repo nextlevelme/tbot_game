@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\GameRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -41,6 +43,16 @@ class Game
      * @ORM\ManyToOne(targetEntity=TgChat::class, inversedBy="games")
      */
     private $TgChat;
+
+    /**
+     * @ORM\ManyToMany(targetEntity=TgUser::class, inversedBy="games")
+     */
+    private $TgUsers;
+
+    public function __construct()
+    {
+        $this->TgUsers = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -103,6 +115,32 @@ class Game
     public function setTgChat(?TgChat $TgChat): self
     {
         $this->TgChat = $TgChat;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|TgUser[]
+     */
+    public function getTgUsers(): Collection
+    {
+        return $this->TgUsers;
+    }
+
+    public function addTgUser(TgUser $tgUser): self
+    {
+        if (!$this->TgUsers->contains($tgUser)) {
+            $this->TgUsers[] = $tgUser;
+        }
+
+        return $this;
+    }
+
+    public function removeTgUser(TgUser $tgUser): self
+    {
+        if ($this->TgUsers->contains($tgUser)) {
+            $this->TgUsers->removeElement($tgUser);
+        }
 
         return $this;
     }

@@ -61,6 +61,32 @@ class TelegramBotController extends AbstractController
         return $this->json([]);
     }
 
+
+    /**
+     * @Route("/telegram/bot/get-updates", name="telegram_bot_get_updates")
+     * @return JsonResponse
+     */
+    public function getUpdates()
+    {
+        try {
+            $telegramToken = $this->getParameter('app.telegram_api_token');
+            $telegramName = $this->getParameter('app.telegram_api_name');
+            // Create Telegram API object
+            $telegram = new Telegram($telegramToken, $telegramName);
+            $telegram->useGetUpdatesWithoutDatabase();
+            $telegram->addCommandsPaths([__DIR__ . '/../TelegramBot/Commands']);
+            $telegram->handleGetUpdates();
+        } catch (TelegramException $e) {
+            $this->logger->debug($e->getMessage());
+            return $this->json(['error' => $e->getMessage()]);
+        } catch (\Exception $e) {
+            $this->logger->debug($e->getMessage());
+            return $this->json(['error' => $e->getMessage()]);
+        }
+
+        return $this->json([]);
+    }
+
     /**
      * @Route("/telegram/bot/set-webhook", name="telegram_bot__set_webhook")
      */

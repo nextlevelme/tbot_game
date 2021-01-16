@@ -2,6 +2,7 @@
 
 namespace App\TelegramBot\Commands\UserCommands;
 
+use App\Entity\TgChat;
 use Doctrine\ORM\EntityManagerInterface;
 use Longman\TelegramBot\Commands\UserCommand;
 use Longman\TelegramBot\Entities\ServerResponse;
@@ -45,7 +46,30 @@ class NewCommand extends UserCommand
     {
         global $kernel;
         $container = $kernel->getContainer();
-        $em = $container->get('doctrine.orm.entity_manager');
+        $doctrine = $container->get('doctrine');
+        $chat = $this->getUpdate()->getMessage()->getChat();
+        $tgChatExtId = $chat->getId();
+        if (empty($tgChatExtId)) {
+            throw new \Exception('Empty chat ext ID');
+        }
+
+        $tgChat = $doctrine->getRepository(TgChat::class)->findOneBy(['ext_id' => $tgChatExtId]);
+        if (is_null($tgChat)) {
+            $tgChat = new TgChat();
+            $tgChat->setAllMembersAreAdministrators($chat->getAllMembersAreAdministrators());
+            $tgChat->setExtId($tgChatExtId);
+            $tgChat->setFirstName($chat->getFirstName());
+            $tgChat->setLastName($chat->getLastName());
+            $tgChat->setTitle($chat->getTitle());
+            $tgChat->setType($chat->getType());
+            $tgChat->setUsername($chat->getUsername());
+
+            $em = $doctrine->getManager();
+            $em->persist($tgChat);
+            $em->flush();
+        } else {
+            $o = 0;
+        }
 
         return $this->replyToChat(
             'Новая игра создана!'
